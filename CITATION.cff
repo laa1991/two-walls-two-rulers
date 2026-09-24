@@ -6,9 +6,10 @@ authors:
   # 人类作者（唯一署名作者）。按 arXiv 政策，AI 不能列为作者：内容责任必须由能承担它的人承担。
   - family-names: "Long"
     given-names: "Anan"
-version: "1.0.2"
+version: "1.0.3"
 date-released: "2026-09-24"
 license: CC-BY-4.0
+doi: "10.5281/zenodo.22931514"
 url: "https://github.com/laa1991/two-walls-two-rulers"
 repository-code: "https://github.com/laa1991/two-walls-two-rulers"
 keywords:
@@ -17,6 +18,6 @@ keywords:
   - deployment case study
   - memory
   - reproducibility
-# 代码（tools/ 下的装置）与本报告分开授权：代码 = Apache-2.0（见 LICENSE），文本 = CC BY 4.0。
-# ⚠️ 待补：doi（Zenodo 落定后填这一行）。缺了它，别人想引用只有仓地址没有版本锚点。
+# 代码（tools/ 下的装置）与本报告分开授权：代码 = Apache-2.0（见 LICENSE），文本 = CC BY 4.0（arXiv 上传时选）。
+# ✅ 2026-09-24：doi / url 已补 —— Zenodo 的 GitHub 集成归档 `v1.0.3` 时自动生成（concept DOI 10.5281/zenodo.22931513，版本 DOI 10.5281/zenodo.22931514）。
 # 装置与全部判读（含标注用的 key）由被测部署自己的 agent（D先生）产出——见 report/draft.md §1.3「Use of AI tools」与 §8 Limitations 第 2 条。
