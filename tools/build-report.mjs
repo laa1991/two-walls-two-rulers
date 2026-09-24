@@ -47,6 +47,31 @@ export const orphanSeps = (t) => {
 const ALLOWED_NON_ASCII = new Set([...'·§—–“”…→÷×†'])
 export const offendersIn = (t) => [...new Set((t.match(/[^\x00-\x7F]/g) ?? []).filter((c) => !ALLOWED_NON_ASCII.has(c)))]
 
+/** 出稿的「阅读形状」（2026-09-24 加 —— 第 7 节空行事故：五道老判据全绿，而 PDF 里**字面印出** `# 7. What we do not claim`）。
+ *  事故机制：`draft.md` 里一个 1110 字符的长段落与 `# 7. …` 之间缺空行 ⇒ 按 CommonMark 紧贴段落的 `#` 不是 ATX 标题
+ *  ⇒ 被转义成字面量；后果四层：正文印出 `#` · 第 7 节内容并进第 6 节 · 编号 6→8 跳号 · `(§7, §8)` 悬空。
+ *  为什么老判据全绿：它们量的是「有哪些字符串」（表数 / 非 ASCII / Missing character / Overfull / PDF 存在），
+ *  **没有一道把产物当一篇文章读**。这一道比的是 **源 → 产物**：
+ *    ① 源里每个标题都必须在产物里以**独立一行**出现（按前 40 字符判，防 pdftotext 折行）
+ *    ② 产物里不许出现字面 markdown 标记（`# ` 后面跟非空白）
+ *    ③ 源里的节编号必须连续（1..max 无缺号）
+ *  返回三个量，任一非零即不合格。 */
+export const renderShape = (srcMd, docText) => {
+  const heads = (srcMd.match(/^#{1,6}[ \t]+.*$/gm) ?? []).map((h) => h.replace(/^#{1,6}[ \t]+/, '').trim())
+  const lines = docText.split('\n').map((l) => l.replace(/[ \t]+$/, '').trimStart())
+  const markers = docText.match(/(?:^|[^\S\n])#[ \t]+\S[^\n]*/g) ?? []
+  const literalMarkers = markers.length
+  const missingHeads = heads.filter((h) => !lines.some((l) => l.startsWith(h.slice(0, Math.min(40, h.length)))))
+  // ③ 节编号必须连续 —— **从产物读，不从源读**（从源读是恒真的：源里当然连续，那样这道断言在真实事故上会静默报绿）。
+  //    机制：一个标题没渲染成标题时，它在产物里就不再以 `<n>. ` 开头 ⇒ 那一号从产物里消失 ⇒ 缺号（事故里是 6→8）。
+  const stem = (h) => { const m = /^(\d+)\./.exec(h); return m ? `${m[1]}. ${h.slice(m[0].length).trim().slice(0, 40)}` : null }
+  const numbered = heads.map((h) => ({ n: Number(/^(\d+)\./.exec(h)?.[1]), stem: stem(h) })).filter((x) => Number.isFinite(x.n) && x.stem)
+  const rendered = new Set(numbered.filter((x) => lines.some((l) => l.startsWith(x.stem))).map((x) => x.n))
+  const maxNum = numbered.length ? Math.max(...numbered.map((x) => x.n)) : 0
+  const gapInNumbers = [...Array(maxNum).keys()].map((i) => i + 1).filter((n) => !rendered.has(n))
+  return { heads: heads.length, literalMarkers, markerSamples: markers.slice(0, 3).map((m) => m.trim().slice(0, 48)), missingHeads, gapInNumbers, renderedNumbers: [...rendered].sort((a, b) => a - b) }
+}
+
 if (process.argv.includes('--selftest')) {
   const good = ['| a | b |', '|---|---|', '| 1 | 2 |'].join('\n')
   const broken = ['| a | b |', '', '|---|---|', '| 1 | 2 |'].join('\n')
@@ -63,7 +88,18 @@ if (process.argv.includes('--selftest')) {
   console.log(`自检（非 ASCII 放行表）：健康字符 offenders=${passOk ? 0 : '≠0'}（应为 0）· 混入 κ/≥ offenders=${passBad ? 2 : '≠2'}（应为 2）`)
   const ok2 = ok && passOk && passBad
   console.log(ok2 ? '✅ 校验器正负对照都按预期响' : '❌ 校验器本身不对，先修它')
-  process.exit(ok2 ? 0 : 3)
+  // 渲染形状判据的正负对照（已知答案）：负料 = 第 7 节事故的形状（标题紧贴长段落 ⇒ 字面印出 `#`）
+  const goodSrc = '# 1. Alpha\n\ntext\n\n# 2. Beta\n\nmore\n'
+  const goodDoc = '1. Alpha\ntext\n2. Beta\nmore\n'
+  const badDoc = '1. Alpha\ntext from theirs. # 2. Beta\nmore\n'
+  const g3 = renderShape(goodSrc, goodDoc)
+  const b3 = renderShape(goodSrc, badDoc)
+  console.log(`自检（渲染形状 · 正）：缺标题 ${g3.missingHeads.length}（应 0）· 字面标记 ${g3.literalMarkers}（应 0）· 缺号 ${g3.gapInNumbers.length}（应 0）`)
+  console.log(`自检（渲染形状 · 负）：缺标题 ${b3.missingHeads.length}（应 1）· 字面标记 ${b3.literalMarkers}（应 1）· 缺号 ${b3.gapInNumbers.length}（应 1）`)
+  const ok3 = g3.missingHeads.length === 0 && g3.literalMarkers === 0 && g3.gapInNumbers.length === 0 &&
+              b3.missingHeads.length === 1 && b3.literalMarkers === 1 && b3.gapInNumbers.length === 1
+  console.log(ok3 ? '✅ 渲染形状判据正负对照都按预期响' : '❌ 渲染形状判据本身不对，先修它')
+  process.exit(ok2 && ok3 ? 0 : 3)
 }
 
 const fail = (msg) => { console.error(`❌ ${msg}`); process.exit(3) }
@@ -132,6 +168,18 @@ const pages = (readFileSync(pdf, 'latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).
 console.log(`  PDF：${statSync(pdf).size} B · 页数≈${pages}`)
 if (missing > 0 || bangs > 0) fail('编译日志里有丢字/报错：见 report/draft-en.log（这一轮先不清场，留着证据）')
 if (worstOverfull > 2) fail(`版面溢出 ${worstOverfull.toFixed(1)}pt（> 2pt 肉眼可见）：grep '^Overfull' report/draft-en.log（这一轮先不清场）`)
+// ---- ⑤ 出稿的阅读形状（2026-09-24 加；这一条是审稿窗口用 pdftotext 发现的第 7 节事故）----
+// 判据形状：**源 → 产物**（源里每个标题都要在产物里成一行；产物里不许有字面 markdown 标记；节编号不许跳号）。
+const pdftotext = process.env.PDFTOTEXT || (bin ? join(bin, 'pdftotext.exe') : '')
+if (!pdftotext || !existsSync(pdftotext)) fail('没找到 pdftotext：设 PDFTOTEXT=<.../pdftotext.exe>（第 ⑤ 道判据要靠它把 PDF 读成文本）')
+const txtOut = join(REPORT, 'draft-en.txt')
+execFileSync(pdftotext, ['-layout', pdf, txtOut], { stdio: 'pipe' })
+const shape = renderShape(read(enMd), read(txtOut))
+rmSync(txtOut, { force: true })
+console.log(`  阅读形状：源标题 ${shape.heads} 个 · 产物里没成行的 ${shape.missingHeads.length} 个${shape.missingHeads.length ? '（' + shape.missingHeads.slice(0, 3).join(' / ') + '）' : ''} · 字面 markdown 标记 ${shape.literalMarkers} 处${shape.literalMarkers ? '（' + shape.markerSamples.join(' | ') + '）' : ''} · 节编号缺 ${shape.gapInNumbers.join(',') || '无'}`)
+if (shape.missingHeads.length || shape.literalMarkers || shape.gapInNumbers.length) {
+  fail('出稿的「阅读形状」不合格（标题没成标题 / 印出字面 markdown / 节编号跳号）—— 见上面那行三个读数；这一类错老五道判据全都看不见')
+}
 for (const junk of readdirSync(REPORT)) {
   if (/\.(aux|log|out|toc)$/.test(junk)) { rmSync(join(REPORT, junk), { force: true }); console.log(`  清掉 ${junk}`) }
 }
