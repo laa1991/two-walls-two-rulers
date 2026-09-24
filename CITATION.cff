@@ -6,11 +6,11 @@ authors:
   # 人类作者（唯一署名作者）。按 arXiv 政策，AI 不能列为作者：内容责任必须由能承担它的人承担。
   - family-names: "Long"
     given-names: "Anan"
-version: "1.0.3"
+version: "1.0.5"
 date-released: "2026-09-24"
 license: CC-BY-4.0
-doi: "10.5281/zenodo.22931514"
-url: "https://github.com/laa1991/two-walls-two-rulers"
+doi: "10.5281/zenodo.22933212"
+url: "https://doi.org/10.5281/zenodo.22931513"
 repository-code: "https://github.com/laa1991/two-walls-two-rulers"
 keywords:
   - context compaction
@@ -19,5 +19,5 @@ keywords:
   - memory
   - reproducibility
 # 代码（tools/ 下的装置）与本报告分开授权：代码 = Apache-2.0（见 LICENSE），文本 = CC BY 4.0（arXiv 上传时选）。
-# ✅ 2026-09-24：doi / url 已补 —— Zenodo 的 GitHub 集成归档 `v1.0.3` 时自动生成（concept DOI 10.5281/zenodo.22931513，版本 DOI 10.5281/zenodo.22931514）。
+# ✅ 2026-09-24：版本链 —— `v1.0.3`（10.5281/zenodo.22931514，**PDF 有缺陷**：§7 标题被印成字面 `# 7.`）→ `v1.0.4`（10.5281/zenodo.22933118 归档到一份**字节损坏**的 PDF；同日重发的 v1.0.4 已正确）→ **`v1.0.5`（当前引用版）**。Zenodo 已发布记录文件不可改 ⇒ 旧版留在档案里，**引用请用 concept DOI `10.5281/zenodo.22931513`**（始终指向最新版）。
 # 装置与全部判读（含标注用的 key）由被测部署自己的 agent（D先生）产出——见 report/draft.md §1.3「Use of AI tools」与 §8 Limitations 第 2 条。
