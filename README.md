@@ -1,7 +1,7 @@
 # Two Walls, Two Rulers: What Context Compaction Actually Drops in a Real Agent Deployment
 
 **Independent research report · September 2026 · Anan Long**
-📄 **[Paper (PDF, 28 pages)](paper/two-walls-two-rulers.pdf)** · LaTeX source + figures in [`paper/`](paper/) · **DOI: [10.5281/zenodo.22931514](https://doi.org/10.5281/zenodo.22931514)**
+📄 **[Paper (PDF, 28 pages)](paper/two-walls-two-rulers.pdf)** · LaTeX source + figures in [`paper/`](paper/) · **DOI: [10.5281/zenodo.22931513](https://doi.org/10.5281/zenodo.22931513)** (concept DOI — always the latest version; current: **v1.0.5**)
 
 ---
 
@@ -53,7 +53,7 @@ Two of the devices ship with a **deliberately broken fixture** so that you can w
 
 ## Citing this work
 
-`CITATION.cff` is in the repository root. Until a DOI is assigned:
+`CITATION.cff` is in the repository root. The work is archived on Zenodo; the **concept DOI below always resolves to the latest version**:
 
 ```bibtex
 @misc{long2026twowalls,
@@ -63,7 +63,7 @@ Two of the devices ship with a **deliberately broken fixture** so that you can w
   month        = {sep},
   howpublished = {Independent research report},
   note         = {Code and aggregate data: \url{https://github.com/laa1991/two-walls-two-rulers}},
-  doi          = {10.5281/zenodo.22931514}
+  doi          = {10.5281/zenodo.22931513}
 }
 ```
 
